@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>607</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>607庚的可愛世界</title>
+    <style>
+        /* 基本樣式 */
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #FFD6E7, #B6F2F2);
+            color: #555;
+        }
+
+        .container {
+            text-align: center;
+            padding: 50px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #FF6B6B;
+            text-shadow: 2px 2px 8px rgba(255, 255, 255, 0.8);
+        }
+
+        nav {
+            margin: 20px 0;
+        }
+
+        nav button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 30px;
+            background: #FFB6C1;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        nav button:hover {
+            transform: scale(1.1);
+            background: #FFA4B7;
+        }
+
+        .section {
+            margin: 20px 0;
+            display: none;
+        }
+
+        #countdown, #messages, #photo-gallery {
+            margin: 20px auto;
+            padding: 15px;
+            background: #FFF1F1;
+            border-radius: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>歡迎來到 607 的世界！</h1>
+        <nav>
+            <button onclick="showSection('countdown-section')">倒數計時</button>
+            <button onclick="showSection('gallery-section')">相片集</button>
+            <button onclick="showSection('message-board-section')">留言板</button>
+        </nav>
+
+        <!-- 倒數計時 -->
+        <div id="countdown-section" class="section">
+            <h2>大日子的倒數計時：</h2>
+            <div id="countdown">載入中...</div>
+        </div>
+
+        <!-- 相片集 -->
+        <div id="gallery-section" class="section">
+            <h2>班級相片集</h2>
+            <div id="photo-gallery">這裡是相片集。</div>
+        </div>
+
+        <!-- 留言板 -->
+        <div id="message-board-section" class="section">
+            <h2>班級留言板</h2>
+            <div id="messages">這裡是留言區。</div>
+            <textarea id="message-input" placeholder="寫下你的留言..."></textarea>
+            <button onclick="postMessage()">發佈留言</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <script>
+        // 初始化 Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_r4w3pb1ZIO8YUCA9Yl9IITSHZi3cCiI",
+            authDomain: "class-6bb0b.firebaseapp.com",
+            projectId: "class-6bb0b",
+            storageBucket: "class-6bb0b.appspot.com",
+            messagingSenderId: "709913685558",
+            appId: "1:709913685558:web:925486cd1b5b9f99527297"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // 顯示對應的區域
+        function showSection(id) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        }
+
+        // 倒數計時功能
+        function showCountdown() {
+            const countdownElement = document.getElementById('countdown');
+            const eventDate = new Date('2025-01-01T00:00:00').getTime();
+
+            setInterval(() => {
+                const now = new Date().getTime();
+                const distance = eventDate - now;
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % 1000) / 1000);
+
+                countdownElement.textContent = `${days}天 ${hours}時 ${minutes}分 ${seconds}秒`;
+            }, 1000);
+        }
+
+        showCountdown();
+
+        // 留言板功能
+        function postMessage() {
+            const messageInput = document.getElementById('message-input');
+            const messages = document.getElementById('messages');
+
+            if (messageInput.value.trim()) {
+                db.collection('messages').add({
+                    content: messageInput.value,
+                    timestamp: new Date()
+                }).then(() => {
+                    const newMessage = document.createElement('div');
+                    newMessage.textContent = messageInput.value;
+                    messages.appendChild(newMessage);
+                    messageInput.value = '';
+                }).catch(error => {
+                    console.error('Error writing message:', error);
+                });
+            }
+        }
+
+        function loadMessages() {
+            const messages = document.getElementById('messages');
+            db.collection('messages').orderBy('timestamp', 'asc').onSnapshot(snapshot => {
+                messages.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const message = doc.data();
+                    const messageElement = document.createElement('div');
+                    messageElement.textContent = message.content;
+                    messages.appendChild(messageElement);
+                });
+            });
+        }
+
+        loadMessages();
+    </script>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
